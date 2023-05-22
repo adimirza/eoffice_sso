@@ -21,3 +21,4 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/cek_api', [App\Http\Controllers\HomeController::class, 'cekApi']);
+Route::post('/login_sso', [App\Http\Controllers\Auth\LoginController::class, 'login_sso'])->name('login_sso');

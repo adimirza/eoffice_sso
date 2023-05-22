@@ -6,10 +6,14 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
-                @php
-                    print_r(session()->all());
-                @endphp
+                
                 <div class="card-body">
+                    <pre>
+                    @php
+                        print_r(session()->all());
+                        print_r(date('d-m-Y H:i:s'));
+                    @endphp
+                    </pre>
                     @if (session('status'))
                         <div class="alert alert-success" role="alert">
                             {{ session('status') }}

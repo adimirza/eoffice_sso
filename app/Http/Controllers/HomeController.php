@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Lib\GetLibrary;
+use App\Models\LogAuthModel;
 use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
@@ -15,7 +16,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth_api');
     }
 
     /**
@@ -30,12 +31,13 @@ class HomeController extends Controller
 
     public function cekApi(Request $request)
     {
-        $lib = new GetLibrary;
-        $login = $lib->apiLogin($request->nip, $request->password);
-        // $response = json_decode($login, true);
-        return json_decode($login, true)['data'][0]['id_pegawai'];
-        // return $response = Http::withOptions([
-        //     'verify' => false,
-        // ])->get('https://jsonplaceholder.typicode.com/todos/1');
+        // $check = LogAuthModel::where('token', $request->token)->first();
+        // echo $request->nip;
+        echo "===".session()->get('nip')."===";
+        if(session()->get('nip')){
+            return json_encode(session()->get('nip'));
+        }
+        return 'tidak ada';
+        // return json_encode(session()->all());
     }
 }
