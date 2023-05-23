@@ -21,4 +21,6 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/cek_api', [App\Http\Controllers\HomeController::class, 'cekApi']);
+Route::get('/periksa_token', [App\Http\Controllers\Auth\LoginController::class, 'periksa_token']);
 Route::post('/login_sso', [App\Http\Controllers\Auth\LoginController::class, 'login_sso'])->name('login_sso');
+Route::post('/logout_sso', [App\Http\Controllers\Auth\LoginController::class, 'logout_sso'])->name('logout_sso');

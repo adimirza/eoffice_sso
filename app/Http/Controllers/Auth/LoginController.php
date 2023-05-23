@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -57,62 +58,90 @@ class LoginController extends Controller
         ])->validate();
 
         $lib = new GetLibrary;
-        $login = $lib->apiLogin($request->nip, $request->password);
-        $result = json_decode($login, true)['data'];
+        $ceknip = $lib->periksanip($request->nip);
+        $res_nip = json_decode($ceknip, true)['data'];
 
-        if ($result) {
+        if ($res_nip) {
+            $login = $lib->apiLogin($request->nip, $request->password);
+            $result = json_decode($login, true)['data'];
+
+            if ($result) {
+                $request->session()->regenerate();
+                $data = [
+                    'nip' => $request->nip,
+                    'status' => 1,
+                ];
+                $request->session()->put($data);
+                $result = $lib->getIP($request->ip());
+                LogAuthModel::create([
+                    'nip' => $data['nip'],
+                    'token' => session()->get('_token'),
+                    'status' => 1,
+                    'tanggal' => date('Y-m-d H:i:s'),
+                    'ip' => $request->ip(),
+                    'latitude' => $result['latitude'],
+                    'longitude' => $result['longitude'],
+                ]);
+                setcookie('token_eoffice', session()->get('_token'), time() + (86400 * 30), "/");
+                setcookie('nip_eoffice', session()->get('nip'), time() + (86400 * 30), "/");
+
+                return redirect()->intended('/home');
+            } else {
+                return 'Password salah.';
+            }
+        } else {
+            return 'NIP tidak ditemukan.';
+        }
+        return back()->with('loginError', 'Login Failed!');
+    }
+
+    public function periksa_token(Request $request)
+    {
+        $lib = new GetLibrary;
+        $result = $lib->getIP($request->ip());
+        $check = LogAuthModel::where([
+            'token' => $request->token,
+            'status' => 1,
+            'ip' => $request->ip()
+        ])->first();
+        if ($check) {
             $request->session()->regenerate();
             $data = [
                 'nip' => $request->nip,
                 'status' => 1,
             ];
             $request->session()->put($data);
-
-            // $minutes = 800;
-            // $response = new Response('Set Cookie');
-            // $response->withCookie(cookie('token_eoffice', session()->get('_token'), $minutes));
-            // Cookie::queue('token_eoffice', $token_sso, $minutes);
-            // Cookie::queue('nip', $request->nip, $minutes);
-            $ip = $request->ip();
-            $result  = array('country'=>'Local', 'city'=>'Local', 'latitude'=>'-6.996612', 'longitude'=>'109.1267785');
-            $ip_data = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$ip));    
-            if($ip_data && $ip_data->geoplugin_countryName != null){
-                $result['country'] = $ip_data->geoplugin_countryName;
-                $result['city'] = $ip_data->geoplugin_city;
-                $result['latitude'] = $ip_data->geoplugin_latitude;
-                $result['longitude'] = $ip_data->geoplugin_longitude;
-            }
-            $check = LogAuthModel::where('nip', $data['nip'])->first();
-            if(!$check){
-                LogAuthModel::create([
-                    'nip' => $data['nip'],
-                    'token' => session()->get('_token'),
-                    'status' => 1,
-                    'terakhir_login' => date('Y-m-d H:i:s'),
-                    'ip' => $ip,
-                    'latitude' => $result['latitude'],
-                    'longitude' => $result['longitude'],
-                ]);
-            }else{
-                LogAuthModel::findOrFail($check->id)->update([
-                    'token' => session()->get('_token'),
-                    'status' => 1,
-                    'terakhir_login' => date('Y-m-d H:i:s'),
-                    'ip' => $ip,
-                    'latitude' => $result['latitude'],
-                    'longitude' => $result['longitude'],
-                ]);
-            }
-            
-            setcookie('token_eoffice', session()->get('_token'), time() + (86400 * 30), "/");
-            // Cookie::queue('token_eoffice', session()->get('_token'), $minutes);
-            // cookie('token_eoffice', session()->get('_token'), $minutes);
-
-            return redirect()->intended('/home');
+            LogAuthModel::create([
+                'nip' => $data['nip'],
+                'token' => session()->get('_token'),
+                'status' => 1,
+                'terakhir_login' => date('Y-m-d H:i:s'),
+                'ip' => $request->ip(),
+                'latitude' => $result['latitude'],
+                'longitude' => $result['longitude'],
+            ]);
+            return Redirect::to('https://');
+        } else {
+            return redirect()->intended('/login');
         }
+    }
 
-        return back()->with('loginError', 'Login Failed!');
-        // $request->session()->regenerate();
-
+    public function logout_sso(Request $request)
+    {
+        setcookie("token_eoffice", "", time() - 3600, "/");
+        setcookie("nip_eoffice", "", time() - 3600, "/");
+        $lib = new GetLibrary;
+        $result = $lib->getIP($request->ip());
+        LogAuthModel::create([
+            'nip' => session()->get('nip'),
+            'token' => session()->get('_token'),
+            'status' => 0,
+            'tanggal' => date('Y-m-d H:i:s'),
+            'ip' => $request->ip(),
+            'latitude' => $result['latitude'],
+            'longitude' => $result['longitude'],
+        ]);
+        $request->session()->flush();
+        return redirect()->intended('/login');
     }
 }

@@ -14,7 +14,7 @@ class LogAuthModel extends Model
         'nip',
         'token',
         'status',
-        'terakhir_login',
+        'tanggal',
         'ip',
         'latitude',
         'longitude',
