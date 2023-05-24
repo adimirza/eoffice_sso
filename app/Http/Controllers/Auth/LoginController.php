@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -70,19 +71,20 @@ class LoginController extends Controller
                 $data = [
                     'nip' => $request->nip,
                     'status' => 1,
+                    'token_eoffice' => Crypt::encryptString($request->nip)
                 ];
                 $request->session()->put($data);
                 $result = $lib->getIP($request->ip());
                 LogAuthModel::create([
                     'nip' => $data['nip'],
-                    'token' => session()->get('_token'),
+                    'token' => session()->get('token_eoffice'),
                     'status' => 1,
                     'tanggal' => date('Y-m-d H:i:s'),
                     'ip' => $request->ip(),
                     'latitude' => $result['latitude'],
                     'longitude' => $result['longitude'],
                 ]);
-                setcookie('token_eoffice', session()->get('_token'), time() + (86400 * 30), "/");
+                setcookie('token_eoffice', session()->get('token_eoffice'), time() + (86400 * 30), "/");
                 setcookie('nip_eoffice', session()->get('nip'), time() + (86400 * 30), "/");
 
                 return redirect()->intended('/home');
@@ -97,33 +99,11 @@ class LoginController extends Controller
 
     public function periksa_token(Request $request)
     {
-        $lib = new GetLibrary;
-        $result = $lib->getIP($request->ip());
-        $check = LogAuthModel::where([
-            'token' => $request->token,
-            'status' => 1,
-            'ip' => $request->ip()
-        ])->first();
-        if ($check) {
-            $request->session()->regenerate();
-            $data = [
-                'nip' => $request->nip,
-                'status' => 1,
-            ];
-            $request->session()->put($data);
-            LogAuthModel::create([
-                'nip' => $data['nip'],
-                'token' => session()->get('_token'),
-                'status' => 1,
-                'terakhir_login' => date('Y-m-d H:i:s'),
-                'ip' => $request->ip(),
-                'latitude' => $result['latitude'],
-                'longitude' => $result['longitude'],
-            ]);
-            return Redirect::to('https://');
-        } else {
-            return redirect()->intended('/login');
+        $dt['status'] = 0;
+        if($request->nip == Crypt::decryptString($request->token_eoffice)){
+            $dt['status'] = 1;
         }
+        return json_encode($dt);
     }
 
     public function logout_sso(Request $request)
@@ -134,7 +114,7 @@ class LoginController extends Controller
         $result = $lib->getIP($request->ip());
         LogAuthModel::create([
             'nip' => session()->get('nip'),
-            'token' => session()->get('_token'),
+            'token' => session()->get('token_eoffice'),
             'status' => 0,
             'tanggal' => date('Y-m-d H:i:s'),
             'ip' => $request->ip(),
@@ -144,4 +124,9 @@ class LoginController extends Controller
         $request->session()->flush();
         return redirect()->intended('/login');
     }
+
+    // public function token_validation(Request $request)
+	// {
+		
+	// }
 }

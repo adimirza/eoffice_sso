@@ -19,3 +19,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/cek_api', [App\Http\Controllers\HomeController::class, 'cekApi']);
+Route::get('/periksa_token', [App\Http\Controllers\Auth\LoginController::class, 'periksa_token']);
