@@ -89,10 +89,10 @@ class LoginController extends Controller
 
                 return redirect()->intended('/home');
             } else {
-                return 'Password salah.';
+                return back()->with('loginError', 'Password salah!');
             }
         } else {
-            return 'NIP tidak ditemukan.';
+            return back()->with('loginError', 'NIP tidak ditemukan!');
         }
         return back()->with('loginError', 'Login Failed!');
     }
