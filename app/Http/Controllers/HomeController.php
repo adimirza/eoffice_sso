@@ -25,8 +25,12 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
+        print_r($request->header('User-Agent'));
+        echo '<br>';
+        print_r(request()->userAgent());
+        die;
         $data['pengumuman'] = PengumumanModel::orderBy('updated_at', 'DESC')->get();
         return view('home', $data);
     }
