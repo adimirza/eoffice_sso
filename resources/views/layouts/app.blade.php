@@ -14,7 +14,7 @@
                     <div class="col-md-11">
                         Selamat datang dihalaman utama SSO Pemkab Tegal, Fulan
                     </div>
-                    <div class="col-md-1" style="background-color: #27DEC0"><i class="fas-right-from-bracket"></i></div>
+                    <div class="col-md-1 text-center rounded" style="background-color: #27DEC0"><a href="{{ route('logout_sso') }}"><i class="fa-solid fa-right-from-bracket"></i></a></div>
                     </div>
                 </div>
 

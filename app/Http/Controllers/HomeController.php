@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Lib\GetLibrary;
 use App\Models\LogAuthModel;
+use App\Models\PengumumanModel;
 use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
@@ -26,7 +27,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $data['pengumuman'] = PengumumanModel::orderBy('updated_at', 'DESC')->get();
+        return view('home', $data);
     }
 
     public function cekApi(Request $request)

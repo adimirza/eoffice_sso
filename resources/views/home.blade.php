@@ -65,22 +65,25 @@
                             <hr class="border border-dark border-2 opacity-100">
                         </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table table-borderless">
+                    <div class="card-body overflow-scroll" style="max-height: 540px;">
+                        @foreach($pengumuman as $peng)
+                        <div class="row bg-light p-3 mb-1 overflow-hidden">
+                            <div class="col-md-2 bg-primary" style="text-align: center;"><img src="{{ asset('assets/img/icon/icons8-megaphone-100.png')}}" width="50" height="50" alt="Pengumuman" class="float-start mx-auto d-block"></div>
+                            <div class="col-md-10">
+                                <div>
+                                    <strong>{{ $peng->judul }}</strong><br>
+                                </div>
+                                <small>{{ $peng->updated_by }}, {{ date('H:i m F Y', strtotime($peng->updated_at)) }}</small>
+                            </div>
+                        </div>
+                        @endforeach
+                        <!-- <table class="table table-borderless">
                             <tr>
                                 <td>
-                                    <div class="row bg-light p-3 w-75 overflow-hidden">
-                                        <div class="col-md-2 bg-primary"><img src="{{ asset('assets/img/icon/icons8-megaphone-100.png')}}" width="50" height="50" alt="Pengumuman" class="float-start mx-auto d-block"></div>
-                                        <div class="col-md-10">
-                                            <div>
-                                                <strong>E-Kinerja sedang maintenance sementara sampai batas waktu tertentu</strong><br>
-                                            </div>
-                                            <small>Admin, 11:30 27 Juni 2023</small>
-                                        </div>
-                                    </div>
+                                    
                                 </td>
                             </tr>
-                        </table>
+                        </table> -->
                     </div>
                 </div>
             </div>

@@ -1,3 +1,11 @@
+@php
+$kode = '';
+@endphp
+@if(!empty($_GET['kode']))
+@php
+$kode = $_GET['kode'];
+@endphp
+@endif
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,6 +55,7 @@
                                 <label>NIP</label>
                                 <div class="mb-3">
                                     <input type="text" name="nip" class="form-control" placeholder="NIP" aria-label="Username">
+                                    <input type="hidden" name="kode" value="{{ $kode }}">
                                     @error('nip')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -63,7 +72,7 @@
                                     @enderror
                                 </div>
                                 <div class="text-center mb-3">
-                                    <button type="submit" class="btn btn-success w-100 mt-4 mb-0" style="background-color: #10ac84;">{{ __('Login') }}</button>
+                                    <button type="submit" class="btn btn-success w-100 mt-4 mb-0" style="background-color: #27DEC0;">{{ __('Login') }}</button>
                                 </div>
                             </form>
                         </div>

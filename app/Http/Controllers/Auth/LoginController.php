@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Lib\GetLibrary;
 use App\Models\LogAuthModel;
+use App\Models\SpModel;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -92,6 +94,29 @@ class LoginController extends Controller
                 return back()->with('loginError', 'Password salah!');
             }
         } else {
+            $sp = SpModel::where('kode', $request->kode)->first();
+            if ($sp) {
+                // $req = Http::post($sp->url_login, [
+                //     'username' => $request->nip,
+                //     'password' => $request->password,
+                // ])->getBody();
+                $data = [
+                    'username' => $request->nip,
+                    'password' => $request->password
+                ];
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, $sp->url_login);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                $req = curl_exec($ch);
+
+                curl_close($ch);
+
+                return print_r($req);
+            }
             return back()->with('loginError', 'NIP tidak ditemukan!');
         }
         return back()->with('loginError', 'Login Failed!');
@@ -100,7 +125,7 @@ class LoginController extends Controller
     public function periksa_token(Request $request)
     {
         $dt['status'] = 0;
-        if($request->nip == Crypt::decryptString($request->token_eoffice)){
+        if ($request->nip == Crypt::decryptString($request->token_eoffice)) {
             $dt['status'] = 1;
         }
         return json_encode($dt);
@@ -126,7 +151,7 @@ class LoginController extends Controller
     }
 
     // public function token_validation(Request $request)
-	// {
-		
-	// }
+    // {
+
+    // }
 }
